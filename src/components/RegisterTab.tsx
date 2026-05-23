@@ -14,9 +14,11 @@ export const RegisterTab: React.FC<RegisterTabProps> = ({ stateService, onChildR
 
   // Database listings from StateService
   const [parents, setParents] = useState<Parent[]>(stateService.parents);
+  const [staffList, setStaffList] = useState<Staff[]>(stateService.staff);
   const [errorMsg, setErrorMsg] = useState<string>('');
   const [successMsg, setSuccessMsg] = useState<string>('');
   const [selectedParentId, setSelectedParentId] = useState<string | null>(stateService.parents[0]?.id || null);
+  const [selectedStaffId, setSelectedStaffId] = useState<string | null>(stateService.staff[0]?.id || null);
 
   // Parent form state
   const [parentForm, setParentForm] = useState({
@@ -45,7 +47,7 @@ export const RegisterTab: React.FC<RegisterTabProps> = ({ stateService, onChildR
     firstName: '',
     lastName: '',
     saIdNumber: '',
-    role: 'Educator',
+    role: 'Lead Educator',
     qualifications: '',
     firstAidExpiry: ''
   });
@@ -165,7 +167,9 @@ export const RegisterTab: React.FC<RegisterTabProps> = ({ stateService, onChildR
       });
 
       setSuccessMsg(`Staff member ${staff.firstName} ${staff.lastName} registered successfully as ${staff.role}.`);
-      setStaffForm({ firstName: '', lastName: '', saIdNumber: '', role: 'Educator', qualifications: '', firstAidExpiry: '' });
+      setStaffForm({ firstName: '', lastName: '', saIdNumber: '', role: 'Lead Educator', qualifications: '', firstAidExpiry: '' });
+      setStaffList([...stateService.staff]);
+      setSelectedStaffId(staff.id);
     } catch (err: any) {
       setErrorMsg(err.message || 'Failed to register staff.');
     }
@@ -624,57 +628,58 @@ export const RegisterTab: React.FC<RegisterTabProps> = ({ stateService, onChildR
 
       {/* Staff Registration Sub Tab */}
       {activeSubTab === 'staff' && (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-xs p-6">
-          <h3 className="font-semibold text-base mb-1">New Daycare Staff Account</h3>
-          <p className="text-xs text-slate-400 mb-6">Track qualifications, certification expiration dates, and roles securely.</p>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Col 1: Registration Form */}
+          <div className="bg-white rounded-xl border border-slate-200 shadow-xs p-6 lg:col-span-1 h-fit">
+            <h3 className="font-semibold text-base mb-1">New Daycare Staff Account</h3>
+            <p className="text-xs text-slate-400 mb-6 font-sans">Track qualifications, certification expiration dates, and roles securely.</p>
 
-          <form onSubmit={handleRegisterStaff} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <form onSubmit={handleRegisterStaff} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">First Name</label>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">First Name</label>
                 <input
                   required
                   type="text"
                   maxLength={100}
                   value={staffForm.firstName}
                   onChange={e => setStaffForm({...staffForm, firstName: e.target.value})}
-                  className="w-full text-sm px-3.5 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
+                  className="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
                   placeholder="e.g. Nomsa"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Last Name</label>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Last Name</label>
                 <input
                   required
                   type="text"
                   maxLength={100}
                   value={staffForm.lastName}
                   onChange={e => setStaffForm({...staffForm, lastName: e.target.value})}
-                  className="w-full text-sm px-3.5 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
+                  className="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
                   placeholder="e.g. Khumalo"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">SA ID Number</label>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">SA ID Number</label>
                 <input
                   required
                   type="text"
                   maxLength={13}
                   value={staffForm.saIdNumber}
                   onChange={e => setStaffForm({...staffForm, saIdNumber: e.target.value})}
-                  className="w-full text-sm font-mono px-3.5 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
+                  className="w-full text-xs font-mono px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
                   placeholder="7811050811082"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Assigned Role</label>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Assigned Role</label>
                 <select
                   value={staffForm.role}
                   onChange={e => setStaffForm({...staffForm, role: e.target.value})}
-                  className="w-full text-sm px-3.5 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none bg-white"
+                  className="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none bg-white"
                 >
                   <option value="Lead Educator">Lead Educator</option>
                   <option value="Childcare Assistant">Childcare Assistant</option>
@@ -683,37 +688,234 @@ export const RegisterTab: React.FC<RegisterTabProps> = ({ stateService, onChildR
                 </select>
               </div>
 
-              <div className="md:col-span-2">
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Qualifications (Comma separated)</label>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Qualifications (Commas)</label>
                 <input
                   type="text"
                   value={staffForm.qualifications}
                   onChange={e => setStaffForm({...staffForm, qualifications: e.target.value})}
-                  className="w-full text-sm px-3.5 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
-                  placeholder="e.g. Bachelor of Education (ECD), First Aid Certification"
+                  className="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
+                  placeholder="e.g. Bachelor of Education (ECD), First Aid"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">First Aid / Safety Certificate Expiry</label>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">First Aid / Safety Certificate Expiry</label>
                 <input
                   type="date"
                   value={staffForm.firstAidExpiry}
                   onChange={e => setStaffForm({...staffForm, firstAidExpiry: e.target.value})}
-                  className="w-full text-sm px-3.5 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
+                  className="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
                 />
               </div>
+
+              <div className="flex justify-end pt-2">
+                <button
+                  type="submit"
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs px-4 py-2.5 rounded-lg shadow-sm transition-all focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+                >
+                  Register Staff Account
+                </button>
+              </div>
+            </form>
+          </div>
+
+          {/* Col 2-3: Directory of Staff and Active Staff Detail View card */}
+          <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-xs p-6 flex flex-col space-y-6">
+            <div>
+              <h3 className="font-semibold text-base mb-1 flex items-center gap-2">
+                <Users className="text-emerald-600 shrink-0" size={18} />
+                Staff Directory & Safety Audit
+              </h3>
+              <p className="text-xs text-slate-400">Track qualifications, roles, and safety certificates. Highlights upcoming expiry within 30 days.</p>
             </div>
 
-            <div className="flex justify-end pt-2">
-              <button
-                type="submit"
-                className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm px-6 py-3 rounded-lg shadow-sm transition-all focus:ring-2 focus:ring-emerald-500"
-              >
-                Register Staff Account
-              </button>
-            </div>
-          </form>
+            {staffList.length === 0 ? (
+              <div className="text-center py-12 bg-slate-50 border border-dashed border-slate-200 rounded-xl text-xs text-slate-400 font-medium">
+                No Staff Records currently indexed. Use the left form to catalog staff.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Staff Index Picker */}
+                <div className="md:col-span-1 border-r border-slate-100 pr-0 md:pr-4 h-96 overflow-y-auto space-y-2">
+                  <span className="block text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1">Index of Staff</span>
+                  {staffList.map(s => {
+                    const isSelected = s.id === selectedStaffId;
+                    
+                    // Check if certification is expiring within next 30 days
+                    const todayVal = new Date('2026-05-23').getTime();
+                    let hasExpiringSoon = false;
+                    let soonestDaysLeft = Infinity;
+                    
+                    if (s.certificationsExpiry) {
+                      Object.values(s.certificationsExpiry).forEach(rawVal => {
+                        const expiryTime = new Date(rawVal as string).getTime();
+                        const diffMs = expiryTime - todayVal;
+                        const daysLeft = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+                        if (daysLeft <= 30) {
+                          hasExpiringSoon = true;
+                          if (daysLeft < soonestDaysLeft) {
+                            soonestDaysLeft = daysLeft;
+                          }
+                        }
+                      });
+                    }
+
+                    return (
+                      <button
+                        key={s.id}
+                        type="button"
+                        onClick={() => setSelectedStaffId(s.id)}
+                        className={`w-full text-left p-2.5 rounded-lg text-xs transition-all border flex flex-col gap-1 ${
+                          isSelected
+                            ? 'bg-emerald-50/70 border-emerald-250 text-emerald-900 font-semibold shadow-2xs'
+                            : 'bg-white border-slate-150 text-slate-705 hover:bg-slate-50'
+                        }`}
+                      >
+                        <div className="flex justify-between items-start w-full gap-2">
+                          <span className="truncate flex items-center gap-1.5 font-bold">
+                            {s.firstName} {s.lastName}
+                            {hasExpiringSoon && (
+                              <span className="text-rose-600 inline-block shrink-0 animate-bounce" title="Certification expiring or expired within 30 days!">
+                                <AlertTriangle size={13} fill="currentColor" className="text-rose-500 fill-rose-105" />
+                              </span>
+                            )}
+                          </span>
+                          <span className="text-[9px] font-mono text-slate-400 font-normal shrink-0">{s.id}</span>
+                        </div>
+                        <div className="flex justify-between items-center text-[9px] text-slate-400 font-medium mt-0.5">
+                          <span>{s.role}</span>
+                          {hasExpiringSoon && (
+                            <span className="text-rose-600 font-extrabold bg-rose-50 px-1 rounded">
+                              {soonestDaysLeft <= 0 ? 'EXPIRED' : `${soonestDaysLeft}d`}
+                            </span>
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Staff Detail Panel */}
+                <div className="md:col-span-2">
+                  {(() => {
+                    const activeS = staffList.find(s => s.id === selectedStaffId) || staffList[0];
+                    if (!activeS) return (
+                      <div className="text-xs text-slate-400 py-10 text-center font-medium">Select a staff member record to view safety details.</div>
+                    );
+
+                    const todayVal = new Date('2026-05-23').getTime();
+                    const certStatusItems: { name: string; date: string; daysLeft: number }[] = [];
+                    if (activeS.certificationsExpiry) {
+                      Object.entries(activeS.certificationsExpiry).forEach(([name, rawVal]) => {
+                        const expiryTime = new Date(rawVal as string).getTime();
+                        const diffMs = expiryTime - todayVal;
+                        const daysLeft = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+                        certStatusItems.push({ name, date: rawVal as string, daysLeft });
+                      });
+                    }
+
+                    const hasAnyExps = certStatusItems.some(i => i.daysLeft <= 30);
+
+                    return (
+                      <div className="space-y-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50 p-4 border border-slate-200 rounded-xl">
+                          <div>
+                            <span className="text-[9px] font-mono font-bold text-slate-400 block tracking-wider uppercase">STAFF PERS MEMBER DETAIL</span>
+                            <h4 className="font-extrabold text-base text-slate-805 flex items-center gap-2">
+                              {activeS.firstName} {activeS.lastName}
+                              {hasAnyExps && (
+                                <span className="inline-flex items-center gap-1 bg-rose-50 border border-rose-225 text-rose-705 text-[10px] font-extrabold px-2 py-0.5 rounded-full select-none shadow-3xs">
+                                  <AlertTriangle size={12} className="text-rose-600" /> EXPIRING CERT
+                                </span>
+                              )}
+                            </h4>
+                          </div>
+                          
+                          <div className="shrink-0 flex items-center">
+                            <span className="inline-flex bg-emerald-50 border border-emerald-250 text-emerald-700 text-[10px] font-extrabold px-3 py-1.5 rounded-full select-none shadow-3xs">
+                              {activeS.role}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Demographics */}
+                        <div className="grid grid-cols-2 gap-4 text-xs font-semibold border border-slate-150 p-4 rounded-xl bg-white">
+                          <div>
+                            <span className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">RSA Identity No.</span>
+                            <span className="font-mono text-slate-805">{activeS.saIdNumber}</span>
+                          </div>
+                          <div>
+                            <span className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Global account ID</span>
+                            <span className="font-mono text-slate-805 bg-slate-105 px-2 py-0.5 rounded border border-slate-150 inline-block">{activeS.id}</span>
+                          </div>
+                          <div className="col-span-2">
+                            <span className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Formal Qualifications</span>
+                            <div className="flex flex-wrap gap-1.5 mt-1">
+                              {activeS.qualifications.length === 0 ? (
+                                <span className="text-xxs text-slate-400 italic">No credentials cataloged during registration.</span>
+                              ) : (
+                                activeS.qualifications.map((q, idx) => (
+                                  <span key={idx} className="bg-slate-50 border border-slate-200 text-slate-700 text-[10.5px] font-bold px-2 py-1 rounded-lg">
+                                    {q}
+                                  </span>
+                                ))
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Statutory Certifications Ledger */}
+                        <div className="p-4 border border-slate-150 rounded-xl space-y-3 bg-white">
+                          <span className="block text-[9px] font-bold uppercase tracking-wider text-slate-400">Statutory Certifications Audit</span>
+                          {certStatusItems.length === 0 ? (
+                            <div className="text-xxs text-slate-400 italic py-1">No upcoming certifications configured in personnel file.</div>
+                          ) : (
+                            <div className="space-y-2">
+                              {certStatusItems.map((item, idx) => {
+                                const isCritical = item.daysLeft <= 0;
+                                const isWarning = item.daysLeft <= 30;
+                                return (
+                                  <div key={idx} className={`text-xs border rounded-xl p-3 flex justify-between items-center transition-all ${
+                                    isCritical 
+                                      ? 'bg-rose-50 border-rose-225 text-rose-900 shadow-3xs' 
+                                      : isWarning 
+                                        ? 'bg-amber-50/50 border-amber-205 text-amber-900' 
+                                        : 'bg-emerald-50/20 border-emerald-150 text-slate-707'
+                                  }`}>
+                                    <div className="flex items-center gap-2">
+                                      {isWarning || isCritical ? (
+                                        <AlertTriangle className={isCritical ? 'text-rose-600' : 'text-amber-550'} size={14} />
+                                      ) : (
+                                        <ShieldCheck className="text-emerald-650" size={14} />
+                                      )}
+                                      <div className="space-y-0.5">
+                                        <span className="font-bold block text-slate-805">{item.name}</span>
+                                        <span className="text-[10px] text-slate-450 block font-normal">Expires: {item.date}</span>
+                                      </div>
+                                    </div>
+                                    <span className={`font-mono px-2 py-0.5 rounded text-[10px] font-bold ${
+                                      isCritical 
+                                        ? 'bg-rose-100/80 text-rose-800 font-extrabold border border-rose-205' 
+                                        : isWarning 
+                                          ? 'bg-amber-100 text-amber-805 border border-amber-200 animate-pulse' 
+                                          : 'bg-emerald-50 text-emerald-805 border border-emerald-250'
+                                    }`}>
+                                      {item.daysLeft <= 0 ? 'EXPIRED' : `${item.daysLeft} days left`}
+                                    </span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

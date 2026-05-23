@@ -120,7 +120,7 @@ export default function App() {
           })}
         </nav>
         
-        <div className="p-4 border-t border-slate-800 text-xxs text-slate-500 font-mono">
+        <div className="p-4 border-t border-slate-800 text-xs text-slate-500 font-mono">
           <div>Client: SA Daycare Ltd</div>
           <div className="mt-1">Locale: Pretoria (ZAR)</div>
         </div>

@@ -222,6 +222,7 @@ export const DashboardTab: React.FC<DashboardTabProps> = ({ stateService }) => {
 
         {/* Outstanding Balance card - styles adjusted dynamically based on money amount */}
         <div 
+          style={{ lineHeight: '25px', width: '248.667px' }}
           className={`p-5 rounded-xl border flex items-center gap-4 shadow-xs transition-all duration-300 ${
             stats.totalOutstanding <= 0 
               ? 'bg-emerald-50 border-emerald-200 text-slate-900' 

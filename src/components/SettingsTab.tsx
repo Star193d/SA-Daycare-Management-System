@@ -108,35 +108,35 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ stateService, onSettin
             </h4>
             <div className="grid grid-cols-3 gap-3">
               <div>
-                <label className="block text-xxs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Bank Name</label>
+                <label className="block text-xxs font-bold text-slate-400 uppercase tracking-wider mb-1.5 whitespace-nowrap truncate" title="Bank Name">Bank Name</label>
                 <input
                   required
                   type="text"
                   value={settings.bankName}
                   onChange={e => setSettings({ ...settings, bankName: e.target.value })}
-                  className="w-full text-xs border border-slate-300 rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full text-xs h-10 border border-slate-300 rounded-lg px-3 outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xxs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Account Number</label>
+                <label className="block text-xxs font-bold text-slate-400 uppercase tracking-wider mb-1.5 whitespace-nowrap truncate" title="Account Number">Account Number</label>
                 <input
                   required
                   type="text"
                   value={settings.accountNumber}
                   onChange={e => setSettings({ ...settings, accountNumber: e.target.value })}
-                  className="w-full text-xs font-mono border border-slate-300 rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full text-xs font-mono h-10 border border-slate-300 rounded-lg px-3 outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xxs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Branch Clearing Code</label>
+                <label className="block text-xxs font-bold text-slate-400 uppercase tracking-wider mb-1.5 whitespace-nowrap truncate" title="Branch Clearing Code">Branch Code</label>
                 <input
                   required
                   type="text"
                   value={settings.branchCode}
                   onChange={e => setSettings({ ...settings, branchCode: e.target.value })}
-                  className="w-full text-xs font-mono border border-slate-300 rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full text-xs font-mono h-10 border border-slate-300 rounded-lg px-3 outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
             </div>

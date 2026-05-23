@@ -106,7 +106,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ stateService, onSettin
             <h4 className="text-xxs uppercase tracking-wider text-slate-400 font-bold border-b border-slate-100 pb-2 flex items-center gap-1">
               <CreditCard size={12} /> Corporate EFT Banking Details
             </h4>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-3 gap-3">
               <div>
                 <label className="block text-xxs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Bank Name</label>
                 <input
@@ -114,7 +114,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ stateService, onSettin
                   type="text"
                   value={settings.bankName}
                   onChange={e => setSettings({ ...settings, bankName: e.target.value })}
-                  className="w-full text-xs border border-slate-300 rounded-lg px-3.5 py-2.5 outline-none"
+                  className="w-full text-xs border border-slate-300 rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
 
@@ -125,7 +125,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ stateService, onSettin
                   type="text"
                   value={settings.accountNumber}
                   onChange={e => setSettings({ ...settings, accountNumber: e.target.value })}
-                  className="w-full text-xs font-mono border border-slate-300 rounded-lg px-3.5 py-2.5 outline-none"
+                  className="w-full text-xs font-mono border border-slate-300 rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
 
@@ -136,7 +136,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({ stateService, onSettin
                   type="text"
                   value={settings.branchCode}
                   onChange={e => setSettings({ ...settings, branchCode: e.target.value })}
-                  className="w-full text-xs font-mono border border-slate-300 rounded-lg px-3.5 py-2.5 outline-none"
+                  className="w-full text-xs font-mono border border-slate-300 rounded-lg px-3 py-2.5 outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
             </div>

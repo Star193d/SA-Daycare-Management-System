@@ -1,0 +1,142 @@
+[
+  {
+    "id": 1,
+    "checkpoint": "Accountability of Daycare Principal",
+    "status": "compliant",
+    "remediation": "Daycare head formally designated as the statutory Information Officer.",
+    "effort": "None"
+  },
+  {
+    "id": 2,
+    "checkpoint": "Designation of Deputy Information Officer",
+    "status": "compliant",
+    "remediation": "Admin Lead appointed and registered with the SA Information Regulator.",
+    "effort": "None"
+  },
+  {
+    "id": 3,
+    "checkpoint": "Double POPIA Consent Gate on dispatching",
+    "status": "compliant",
+    "remediation": "Interactive confirmation flow added before WhatsApp or Email document transmission.",
+    "effort": "None"
+  },
+  {
+    "id": 4,
+    "checkpoint": "Obfuscation of Children SA National ID Numbers",
+    "status": "compliant",
+    "remediation": "System masks SA IDs with format ***-***-XXXX-X on all render, PDF, print and export boundaries.",
+    "effort": "None"
+  },
+  {
+    "id": 5,
+    "checkpoint": "Obfuscation of Parent National Identifiers",
+    "status": "compliant",
+    "remediation": "maskSAId system masks parent national ID sequences across all invoices and rosters.",
+    "effort": "None"
+  },
+  {
+    "id": 6,
+    "checkpoint": "Luhn algorithm client-side checksum validation",
+    "status": "compliant",
+    "remediation": "Enforced to prevent invalid registrations of bogus files in the system.",
+    "effort": "None"
+  },
+  {
+    "id": 7,
+    "checkpoint": "Limitation of Medical Data collection to allergies",
+    "status": "compliant",
+    "remediation": "Only collect required dietary allergen and emergency medical notes.",
+    "effort": "None"
+  },
+  {
+    "id": 8,
+    "checkpoint": "Enforcement of 5-Year Data retention limits",
+    "status": "compliant",
+    "remediation": "DaycareSettings configures POPIA Section 14 statutory retention parameters (default 5 years).",
+    "effort": "None"
+  },
+  {
+    "id": 9,
+    "checkpoint": "Written Employee POPIA Training manuals",
+    "status": "non-compliant",
+    "remediation": "Draft staff manual detailing data sharing protocols on child allergy labels.",
+    "effort": "Low (2 days)"
+  },
+  {
+    "id": 10,
+    "checkpoint": "Secure Physical Storage of historic paper logs",
+    "status": "non-compliant",
+    "remediation": "Deploy fireproof cabinets for legacy paper sign-in roster sheets.",
+    "effort": "Medium (1 week)"
+  },
+  {
+    "id": 11,
+    "checkpoint": "Statutory Incident Response Playbook",
+    "status": "non-compliant",
+    "remediation": "Formal incident disclosure plan to notify Information Regulator within 72 hours of breaches.",
+    "effort": "Medium (3 days)"
+  },
+  {
+    "id": 12,
+    "checkpoint": "Parent Consent Opt-In records",
+    "status": "compliant",
+    "remediation": "Signed parent physical consent forms are kept linked with digital profiles.",
+    "effort": "None"
+  },
+  {
+    "id": 13,
+    "checkpoint": "Data Portability protocol",
+    "status": "compliant",
+    "remediation": "Added easy Excel/CSV export options for Parent request scenarios.",
+    "effort": "None"
+  },
+  {
+    "id": 14,
+    "checkpoint": "Physical premises lock gates & security",
+    "status": "non-compliant",
+    "remediation": "Review boundary locks where physical documents and class folders are held.",
+    "effort": "Medium (1 week)"
+  },
+  {
+    "id": 15,
+    "checkpoint": "Institutional Banking Details scrubbing",
+    "status": "compliant",
+    "remediation": "Bank account numbers only displayed on invoices and never output to console logs.",
+    "effort": "None"
+  },
+  {
+    "id": 16,
+    "checkpoint": "Security audit logs representing staff activity",
+    "status": "compliant",
+    "remediation": "Added central logAction ledger tracking all deletions, entries, and edits.",
+    "effort": "None"
+  },
+  {
+    "id": 17,
+    "checkpoint": "Secure Local Storage boundaries",
+    "status": "compliant",
+    "remediation": "Browser storage scoped entirely within the sandboxed and origin-isolated frame.",
+    "effort": "None"
+  },
+  {
+    "id": 18,
+    "checkpoint": "Cross Border data transfers protocol",
+    "status": "not-applicable",
+    "remediation": "No data is transmitted outside Republic of South Africa geographic borders.",
+    "effort": "None"
+  },
+  {
+    "id": 19,
+    "checkpoint": "Statutory Information Officer Registration",
+    "status": "non-compliant",
+    "remediation": "Upload official Registration Form to the Information Regulator portal.",
+    "effort": "Low (1 day)"
+  },
+  {
+    "id": 20,
+    "checkpoint": "POPIA Privacy Notice displayed to parents",
+    "status": "compliant",
+    "remediation": "Enforced via institutional settings notice panel visible on first use.",
+    "effort": "None"
+  }
+]

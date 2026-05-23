@@ -1,0 +1,6 @@
+{
+  "name": "SA Daycare Management System",
+  "description": "Comprehensive South African daycare management system with billing, registration, attendance, and POPIA-compliant reporting.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

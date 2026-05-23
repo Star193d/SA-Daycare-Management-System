@@ -22,6 +22,7 @@ export interface Parent {
   phone: string;
   address: string;
   childrenIds: string[]; // Missing children tracking linked to auto-billing discounts
+  popiaSigned?: boolean; // Dynamically tracks if parent has signed the latest POPIA form
 }
 
 export interface Staff {

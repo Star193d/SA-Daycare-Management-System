@@ -16,6 +16,7 @@ export const RegisterTab: React.FC<RegisterTabProps> = ({ stateService, onChildR
   const [parents, setParents] = useState<Parent[]>(stateService.parents);
   const [errorMsg, setErrorMsg] = useState<string>('');
   const [successMsg, setSuccessMsg] = useState<string>('');
+  const [selectedParentId, setSelectedParentId] = useState<string | null>(stateService.parents[0]?.id || null);
 
   // Parent form state
   const [parentForm, setParentForm] = useState({
@@ -24,7 +25,8 @@ export const RegisterTab: React.FC<RegisterTabProps> = ({ stateService, onChildR
     saIdNumber: '',
     email: '',
     phone: '',
-    address: ''
+    address: '',
+    popiaSigned: false
   });
 
   // Child form state
@@ -66,13 +68,15 @@ export const RegisterTab: React.FC<RegisterTabProps> = ({ stateService, onChildR
         saIdNumber: parentForm.saIdNumber.trim(),
         email: parentForm.email.trim(),
         phone: parentForm.phone.trim(),
-        address: parentForm.address.trim()
+        address: parentForm.address.trim(),
+        popiaSigned: parentForm.popiaSigned
       });
 
       setParents([...stateService.parents]);
+      setSelectedParentId(parent.id);
       setSuccessMsg(`Parent ${parent.firstName} ${parent.lastName} registered successfully under Account ID ${parent.id}.`);
       setChildForm(prev => ({ ...prev, parentId: parent.id })); // auto-select parent for child form
-      setParentForm({ firstName: '', lastName: '', saIdNumber: '', email: '', phone: '', address: '' });
+      setParentForm({ firstName: '', lastName: '', saIdNumber: '', email: '', phone: '', address: '', popiaSigned: false });
       setActiveSubTab('child');
     } catch (err: any) {
       setErrorMsg(err.message || 'Failed to register parent.');
@@ -335,97 +339,286 @@ export const RegisterTab: React.FC<RegisterTabProps> = ({ stateService, onChildR
 
       {/* Parent Registration Sub Tab */}
       {activeSubTab === 'parent' && (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-xs p-6">
-          <h3 className="font-semibold text-base mb-1">New Parent Account</h3>
-          <p className="text-xs text-slate-400 mb-6 font-sans">Creates primary legal relation entities. Requires POPIA compliance consent validation.</p>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Col 1: Registration Form */}
+          <div className="bg-white rounded-xl border border-slate-200 shadow-xs p-6 lg:col-span-1 h-fit">
+            <h3 className="font-semibold text-base mb-1">New Parent Account</h3>
+            <p className="text-xs text-slate-400 mb-6 font-sans">Creates primary legal relation entities. Requires POPIA compliance consent validation.</p>
 
-          <form onSubmit={handleRegisterParent} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <form onSubmit={handleRegisterParent} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">First Name</label>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">First Name</label>
                 <input
                   required
                   type="text"
                   maxLength={100}
                   value={parentForm.firstName}
                   onChange={e => setParentForm({...parentForm, firstName: e.target.value})}
-                  className="w-full text-sm px-3.5 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
+                  className="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
                   placeholder="e.g. Thabo"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Last Name</label>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Last Name</label>
                 <input
                   required
                   type="text"
                   maxLength={100}
                   value={parentForm.lastName}
                   onChange={e => setParentForm({...parentForm, lastName: e.target.value})}
-                  className="w-full text-sm px-3.5 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
+                  className="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
                   placeholder="e.g. Mnguni"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">SA ID Number</label>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">SA ID Number</label>
                 <input
                   required
                   type="text"
                   maxLength={13}
                   value={parentForm.saIdNumber}
                   onChange={e => setParentForm({...parentForm, saIdNumber: e.target.value})}
-                  className="w-full text-sm font-mono px-3.5 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
+                  className="w-full text-xs font-mono px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
                   placeholder="e.g. 8503155800081"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Contact Number</label>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Contact Number</label>
                 <input
                   required
                   type="text"
                   value={parentForm.phone}
                   onChange={e => setParentForm({...parentForm, phone: e.target.value})}
-                  className="w-full text-sm px-3.5 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
+                  className="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
                   placeholder="e.g. 0825551234"
                 />
               </div>
 
-              <div className="md:col-span-2">
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Email Address</label>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Email Address</label>
                 <input
                   required
                   type="email"
                   value={parentForm.email}
                   onChange={e => setParentForm({...parentForm, email: e.target.value})}
-                  className="w-full text-sm px-3.5 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
+                  className="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
                   placeholder="e.g. thabo.m@example.co.za"
                 />
               </div>
 
-              <div className="md:col-span-2">
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Residential Address</label>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Residential Address</label>
                 <input
                   required
                   type="text"
                   value={parentForm.address}
                   onChange={e => setParentForm({...parentForm, address: e.target.value})}
-                  className="w-full text-sm px-3.5 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
+                  className="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
                   placeholder="e.g. 12 Nelson Mandela Drive, Pretoria"
                 />
               </div>
+
+              <div className="flex items-start gap-2.5 bg-slate-50 border border-slate-200 p-3 rounded-lg mt-2">
+                <input
+                  type="checkbox"
+                  id="popiaSigned"
+                  checked={parentForm.popiaSigned}
+                  onChange={e => setParentForm({...parentForm, popiaSigned: e.target.checked})}
+                  className="mt-0.5 h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-slate-300 rounded"
+                />
+                <label htmlFor="popiaSigned" className="select-none text-[11px] font-medium text-slate-600 cursor-pointer leading-normal">
+                  Parent has signed the latest POPIA consent form
+                </label>
+              </div>
+
+              <div className="flex justify-end pt-2">
+                <button
+                  type="submit"
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs px-4 py-2.5 rounded-lg shadow-sm transition-all focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+                >
+                  Register Parent Account
+                </button>
+              </div>
+            </form>
+          </div>
+
+          {/* Col 2-3: Directory of Parents and Active Parent Detail View card */}
+          <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-xs p-6 flex flex-col space-y-6">
+            <div>
+              <h3 className="font-semibold text-base mb-1 flex items-center gap-2">
+                <ShieldCheck className="text-emerald-600 shrink-0" size={18} />
+                Parent Directory & COPI/POPIA Audit
+              </h3>
+              <p className="text-xs text-slate-400">Track and view compliance and consent form signatures dynamically for parent profiles.</p>
             </div>
 
-            <div className="flex justify-end pt-2">
-              <button
-                type="submit"
-                className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm px-6 py-3 rounded-lg shadow-sm transition-all focus:ring-2 focus:ring-emerald-500"
-              >
-                Register Parent Account
-              </button>
-            </div>
-          </form>
+            {parents.length === 0 ? (
+              <div className="text-center py-12 bg-slate-50 border border-dashed border-slate-200 rounded-xl text-xs text-slate-400 font-medium">
+                No Parent Records currently indexed. Use the form to catalog a family.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Parents Index Sidebar Picker List */}
+                <div className="md:col-span-1 border-r border-slate-100 pr-0 md:pr-4 h-96 overflow-y-auto space-y-2">
+                  <span className="block text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-1">Index of Owners</span>
+                  {parents.map(p => {
+                    const isSelected = p.id === selectedParentId;
+                    return (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => setSelectedParentId(p.id)}
+                        className={`w-full text-left p-2.5 rounded-lg text-xs transition-all border flex flex-col gap-1 ${
+                          isSelected
+                            ? 'bg-emerald-50/70 border-emerald-250 text-emerald-900 font-semibold shadow-2xs'
+                            : 'bg-white border-slate-150 text-slate-700 hover:bg-slate-50'
+                        }`}
+                      >
+                        <div className="flex justify-between items-center w-full">
+                          <span className="truncate">{p.firstName} {p.lastName}</span>
+                          <span className="text-[9px] font-mono text-slate-400 font-normal">{p.id}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 mt-0.5 text-[9px] text-slate-400">
+                          <span className={`h-2 w-2 rounded-full shrink-0 ${p.popiaSigned ? 'bg-emerald-55 bg-emerald-500' : 'bg-rose-500'}`} />
+                          <span className="font-medium">{p.popiaSigned ? 'POPIA Signed' : 'POPIA Pending'}</span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Parent Detail View Card with status badge */}
+                <div className="md:col-span-2">
+                  {(() => {
+                    const activeP = parents.find(p => p.id === selectedParentId) || parents[0];
+                    if (!activeP) return (
+                      <div className="text-xs text-slate-400 py-10 text-center font-medium">Select a parent record to view audit details.</div>
+                    );
+
+                    return (
+                      <div className="space-y-4">
+                        {/* Parent compliance header display */}
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50 p-4 border border-slate-200 rounded-xl">
+                          <div>
+                            <span className="text-[9px] font-mono font-bold text-slate-400 block tracking-wider uppercase">PARENT ACCOUNT DETAIL</span>
+                            <h4 className="font-extrabold text-base text-slate-800">{activeP.firstName} {activeP.lastName}</h4>
+                          </div>
+                          
+                          {/* DYNAMIC COMPLIANCE STATUS BADGE */}
+                          <div className="shrink-0 flex items-center">
+                            {activeP.popiaSigned ? (
+                              <span className="inline-flex items-center gap-1.5 bg-emerald-50 border border-emerald-250 text-emerald-700 text-[10px] font-extrabold px-3 py-1.5 rounded-full select-none shadow-3xs">
+                                <ShieldCheck size={14} className="text-emerald-600" />
+                                POPIA COMPLIANT
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1.5 bg-rose-50 border border-rose-225 text-rose-700 text-[10px] font-extrabold px-3 py-1.5 rounded-full select-none shadow-3xs">
+                                <AlertTriangle size={14} className="text-rose-600" />
+                                CONSENT OUTSTANDING
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Demographic Fields */}
+                        <div className="grid grid-cols-2 gap-4 text-xs font-semibold border border-slate-150 p-4 rounded-xl bg-white">
+                          <div>
+                            <span className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">South African ID No.</span>
+                            <span className="font-mono text-slate-800">{maskSAId(activeP.saIdNumber)}</span>
+                          </div>
+                          <div>
+                            <span className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Global account ID</span>
+                            <span className="font-mono text-slate-800 bg-slate-105 px-2 py-0.5 rounded border border-slate-150 inline-block">{activeP.id}</span>
+                          </div>
+                          <div className="col-span-2">
+                            <span className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Email Address</span>
+                            <span className="text-slate-850 truncate bg-slate-50 border border-slate-100 p-2 rounded block font-medium">{activeP.email}</span>
+                          </div>
+                          <div>
+                            <span className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Contact Line</span>
+                            <span className="text-slate-800 font-mono">{activeP.phone}</span>
+                          </div>
+                          <div>
+                            <span className="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Residency</span>
+                            <span className="text-slate-850 truncate block" title={activeP.address}>{activeP.address}</span>
+                          </div>
+                        </div>
+
+                        {/* Associated Child Dependents List */}
+                        <div className="p-4 border border-slate-150 rounded-xl space-y-2.5 bg-white">
+                          <span className="block text-[9px] font-bold uppercase tracking-wider text-slate-400">Enrolled Dependent Children</span>
+                          {(() => {
+                            const children = stateService.children.filter(ch => ch.parentId === activeP.id);
+                            if (children.length === 0) {
+                              return <div className="text-xxs text-slate-400 italic py-1">No child beneficiaries registered under this parent profile yet.</div>;
+                            }
+                            return (
+                              <div className="space-y-1.5">
+                                {children.map(ch => (
+                                  <div key={ch.id} className="text-xs bg-slate-50 border border-slate-150 rounded-xl p-3 flex justify-between items-center">
+                                    <div className="flex items-center gap-2">
+                                      <Baby className="text-emerald-600 shrink-0" size={14} />
+                                      <span className="font-bold text-slate-800">{ch.firstName} {ch.lastName}</span>
+                                    </div>
+                                    <span className="font-mono bg-emerald-50 text-emerald-805 border border-emerald-200 px-2 py-0.5 rounded text-[10px] font-bold">Group: {ch.groupId}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            );
+                          })()}
+                        </div>
+
+                        {/* Real-time POPIA Signed Toggle Button Card */}
+                        <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
+                          <div className="space-y-1">
+                            <h5 className="font-bold text-xs text-slate-800">Direct Compliance Consent Execution</h5>
+                            <p className="text-[10px] text-slate-400 leading-normal">
+                              Instruct system to issue or update formal statutory POPIA declarations under Section 18 directives. Updates are applied in real-time.
+                            </p>
+                          </div>
+                          <div className="flex justify-end">
+                            {activeP.popiaSigned ? (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  // Update state in service
+                                  const updated = { ...activeP, popiaSigned: false };
+                                  stateService.updateParent(updated);
+                                  // Sync back to local tab parents state
+                                  setParents([...stateService.parents]);
+                                }}
+                                className="text-xxs bg-white text-rose-600 hover:bg-rose-50 border border-rose-225 font-bold px-4 py-2 rounded-lg transition-all cursor-pointer shadow-3xs"
+                              >
+                                Revoke Consent / Reject Forms
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  // Update state in service
+                                  const updated = { ...activeP, popiaSigned: true };
+                                  stateService.updateParent(updated);
+                                  // Sync back to local tab parents state
+                                  setParents([...stateService.parents]);
+                                }}
+                                className="text-xxs bg-emerald-600 text-white hover:bg-emerald-700 font-bold px-4 py-2 rounded-lg shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
+                              >
+                                <CheckCircle size={13} />
+                                Sign POPIA Consent Statement
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
 

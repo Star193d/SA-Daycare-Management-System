@@ -20,6 +20,7 @@ export const BillingTab: React.FC<BillingTabProps> = ({ stateService }) => {
   // Navigation states inside Billing
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
+  const [previewInvoice, setPreviewInvoice] = useState<Invoice | null>(null);
   
   // Consent dialog state
   const [consentDialog, setConsentDialog] = useState<{
@@ -371,6 +372,7 @@ export const BillingTab: React.FC<BillingTabProps> = ({ stateService }) => {
           onMarkStatus={(status) => handleChangeStatus(selectedInvoice, status)}
           onDownload={() => handleDownloadPDF(selectedInvoice)}
           onTriggerSend={(channel) => setConsentDialog({ show: true, channel, invoice: selectedInvoice })}
+          onPreview={() => setPreviewInvoice(selectedInvoice)}
         />
       )}
 
@@ -425,6 +427,18 @@ export const BillingTab: React.FC<BillingTabProps> = ({ stateService }) => {
           </div>
         </div>
       )}
+
+      {/* PDF Invoice Live Sheet Preview Modal */}
+      {previewInvoice && (
+        <InvoicePreviewModal 
+          invoice={previewInvoice}
+          stateService={stateService}
+          onClose={() => setPreviewInvoice(null)}
+          onDownload={() => {
+            handleDownloadPDF(previewInvoice);
+          }}
+        />
+      )}
     </div>
   );
 };
@@ -438,10 +452,11 @@ interface DetailProps {
   onMarkStatus: (status: 'Paid' | 'Voided' | 'Sent') => void;
   onDownload: () => void;
   onTriggerSend: (channel: 'WhatsApp' | 'Email') => void;
+  onPreview: () => void;
 }
 
 const InvoiceDetailCard: React.FC<DetailProps> = ({
-  invoice, stateService, onBack, onEdit, onMarkStatus, onDownload, onTriggerSend
+  invoice, stateService, onBack, onEdit, onMarkStatus, onDownload, onTriggerSend, onPreview
 }) => {
   const parent = stateService.parents.find(p => p.id === invoice.parentId);
   const child = stateService.children.find(c => c.id === invoice.childId);
@@ -467,6 +482,12 @@ const InvoiceDetailCard: React.FC<DetailProps> = ({
               <Lock size={12} /> Invoice Locked (Non-Editable)
             </span>
           )}
+          <button 
+            onClick={onPreview}
+            className="bg-slate-100 hover:bg-slate-205 text-slate-750 font-semibold text-xs border border-slate-300 rounded-md px-3.5 py-1.5 flex items-center gap-1.5 transition-all"
+          >
+            <Search size={13} className="text-slate-500" /> Preview Invoice
+          </button>
           <button 
             onClick={onDownload}
             className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs rounded-md px-3.5 py-1.5 flex items-center gap-1 shadow-xs transition-all"
@@ -760,6 +781,179 @@ const InvoiceEditorForm: React.FC<EditProps> = ({ invoice, stateService, onCance
           </button>
         </div>
       </form>
+    </div>
+  );
+};
+
+interface PreviewModalProps {
+  invoice: Invoice;
+  stateService: StateService;
+  onClose: () => void;
+  onDownload: () => void;
+}
+
+const InvoicePreviewModal: React.FC<PreviewModalProps> = ({ invoice, stateService, onClose, onDownload }) => {
+  const parent = stateService.parents.find(p => p.id === invoice.parentId);
+  const child = stateService.children.find(c => c.id === invoice.childId);
+
+  return (
+    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 overflow-y-auto">
+      <div className="bg-slate-100 rounded-2xl max-w-3xl w-full my-8 border border-slate-300 shadow-2xl overflow-hidden flex flex-col">
+        {/* Modal Top Control Bar */}
+        <div className="bg-slate-800 text-slate-250 px-6 py-4 flex items-center justify-between border-b border-slate-700 select-none">
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-xs font-bold tracking-wider uppercase text-slate-200">PDF Print Preview Engine v1.2</span>
+          </div>
+          <div className="flex items-center gap-2.5">
+            <button 
+              onClick={onDownload}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xxs px-3 py-1.5 rounded-md shadow-xs transition-colors flex items-center gap-1 cursor-pointer"
+            >
+              <Download size={12} /> Download PDF
+            </button>
+            <button 
+              onClick={onClose}
+              className="bg-slate-700 hover:bg-slate-600 text-slate-300 hover:text-white font-semibold text-xxs px-3 py-1.5 rounded-md border border-slate-600 transition-colors cursor-pointer"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+
+        {/* The PDF Sheet Replica Canvas */}
+        <div className="p-8 overflow-y-auto max-h-[70vh] flex justify-center bg-slate-200">
+          <div className="bg-white max-w-2xl w-full shadow-lg border border-slate-300 p-8 font-sans text-xs text-slate-800 leading-normal relative min-h-[297mm] flex flex-col justify-between">
+            <div>
+              {/* Header slate bar */}
+              <div className="bg-slate-900 text-white -mx-8 -mt-8 p-8 flex justify-between items-start mb-8">
+                <div>
+                  <h1 className="text-xl font-bold tracking-tight">S.A. TAX INVOICE</h1>
+                  <span className="text-[10px] uppercase tracking-widest text-slate-400 block mt-1">Official Document</span>
+                  <p className="text-[10px] text-slate-450 mt-2">VAT Number: {stateService.settings.vatNumber}</p>
+                </div>
+                <div className="text-right">
+                  <span className="text-emerald-400 font-mono font-bold text-sm">{invoice.id}</span>
+                  <p className="text-[10px] text-slate-400 font-mono mt-1">Ref Version: V{invoice.version}</p>
+                  <p className="text-[10px] text-slate-400 font-mono">Date: {formatSADate(invoice.issueDate)}</p>
+                  <p className="text-[10px] text-slate-400 font-mono">Due: {formatSADate(invoice.dueDate)}</p>
+                </div>
+              </div>
+
+              {/* Daycare & Recipient metadata boxes */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-b border-slate-200 pb-6 mb-6">
+                <div className="space-y-1">
+                  <h4 className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">Issued By Daycare:</h4>
+                  <p className="font-bold text-slate-900 text-xs">{stateService.settings.name}</p>
+                  <p className="text-slate-500 text-[11px] leading-relaxed">{stateService.settings.address}</p>
+                  <p className="text-slate-500 text-[11px]">Phone: {stateService.settings.phone}</p>
+                  <p className="text-slate-500 text-[11px]">{stateService.settings.email}</p>
+                </div>
+                <div className="space-y-1">
+                  <h4 className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-1">Bill To Parent:</h4>
+                  <p className="font-bold text-slate-900 text-xs">{parent ? `${parent.firstName} ${parent.lastName}` : 'N/A'}</p>
+                  <p className="text-slate-500 text-[11px]">SA ID: {parent ? maskSAId(parent.saIdNumber) : 'N/A'} (POPIA Encrypted)</p>
+                  <p className="text-slate-550 text-[11px]">{parent ? parent.email : ''}</p>
+                  <p className="text-slate-550 text-[11px]">{parent ? parent.phone : ''}</p>
+                </div>
+              </div>
+
+              {/* Beneficiary particulars */}
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 mb-6 space-y-1 font-sans">
+                <h4 className="text-[9px] uppercase tracking-wider text-slate-400 font-bold">Child Beneficiary Details</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-[11px]">
+                  <div>Full Name: <span className="font-semibold text-slate-855">{child ? `${child.firstName} ${child.lastName}` : 'N/A'}</span></div>
+                  <div>Assigned Class Group: <span className="font-semibold text-emerald-700">{child ? child.groupId : 'N/A'}</span></div>
+                  <div>Enrollment Commencement: <span className="font-mono">{child ? formatSADate(child.enrollmentDate) : 'N/A'}</span></div>
+                  {child && child.allergies.length > 0 && (
+                    <div className="col-span-1 md:col-span-2 text-rose-600 font-semibold text-[10px]">
+                      ⚠️ Critical Allergies: {child.allergies.join(', ')}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Invoice lines table */}
+              <div className="space-y-2 mb-8 font-sans">
+                <h3 className="text-[10px] uppercase tracking-wider text-slate-400 font-bold mb-2">Itemized Particulars</h3>
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="border-b border-slate-300 text-slate-500 font-bold text-[10px]">
+                      <th className="pb-2 w-3/4">Item Line Description</th>
+                      <th className="pb-2 text-right">Amount (ZAR)</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {invoice.items.map((item, idx) => (
+                      <tr key={idx} className="text-[11px]">
+                        <td className="py-2.5 text-slate-700 font-medium">{item.description}</td>
+                        <td className="py-2.5 text-right font-mono font-medium text-slate-800">{(item.amount / 100).toFixed(2)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Financial calculations panel */}
+              <div className="flex justify-end pr-1 border-t border-slate-200 pt-4 mb-10 font-sans">
+                <div className="w-64 space-y-2 text-xxs">
+                  <div className="flex justify-between text-slate-505">
+                    <span>Subtotal Excl. VAT</span>
+                    <span className="font-mono text-slate-700">{(invoice.subtotal / 100).toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-slate-505">
+                    <span>VAT (15.0%)</span>
+                    <span className="font-mono text-slate-705">{(invoice.vatAmount / 100).toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-slate-900 font-bold text-xs pt-1.5 border-t border-slate-200">
+                    <span>FINAL TOTAL DUE</span>
+                    <span className="font-mono text-emerald-600 text-sm">R {(invoice.total / 100).toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-auto font-sans">
+              {/* Banking instructions */}
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 mb-6 text-xxs space-y-1">
+                <h4 className="font-bold text-indigo-950 uppercase tracking-wide">Banking Payment Instructions:</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-y-1 gap-x-4">
+                  <div>Beneficiary: <span className="font-medium text-slate-800">{stateService.settings.name}</span></div>
+                  <div>Account Ref Code: <span className="font-mono font-bold text-indigo-700">{invoice.id}</span></div>
+                  <div>Bank Institution: <span className="font-medium text-slate-800">{stateService.settings.bankName}</span></div>
+                  <div>Branch Code: <span className="font-mono text-slate-850">{stateService.settings.branchCode}</span></div>
+                  <div className="col-span-1 md:col-span-2 font-semibold">Registered Account Code: <span className="font-mono font-bold text-slate-850">{stateService.settings.accountNumber}</span></div>
+                </div>
+              </div>
+
+              {/* Notice footnotes */}
+              <div className="border-t border-slate-200 pt-3 text-[9px] text-slate-400 leading-normal flex justify-between items-center select-none">
+                <span>© {stateService.settings.name} Pty (Ltd)</span>
+                <span>Adheres with SA Act 4 of 2013 (POPIA)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Modal Footer Control Bar */}
+        <div className="bg-slate-50 px-6 py-4 flex justify-end gap-2 border-t border-slate-200 select-none">
+          <button 
+            onClick={onClose}
+            className="bg-white hover:bg-slate-100 border border-slate-300 text-slate-600 font-semibold px-4 py-2 text-xs rounded-lg transition-colors cursor-pointer"
+          >
+            Go Back
+          </button>
+          <button 
+            onClick={() => {
+              onDownload();
+              onClose();
+            }}
+            className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2 text-xs rounded-lg shadow-sm transition-colors flex items-center gap-1.5 cursor-pointer"
+          >
+            <Download size={13} /> Confirm & Download PDF
+          </button>
+        </div>
+      </div>
     </div>
   );
 };

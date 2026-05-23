@@ -3,6 +3,7 @@ import { StateService } from '../lib/services/StateService';
 import { Child, AttendanceRecord } from '../lib/types';
 import { maskSAId } from '../lib/utils';
 import { CalendarCheck, Upload, Download, Check, AlertTriangle, Users, FileSpreadsheet } from 'lucide-react';
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
 interface AttendanceTabProps {
   stateService: StateService;
@@ -41,6 +42,52 @@ export const AttendanceTab: React.FC<AttendanceTabProps> = ({ stateService }) =>
     });
     return map;
   }, [children, attendance]);
+
+  // Weekly group calculations for the selected month to feed Recharts
+  const weeklyChartData = useMemo(() => {
+    const yearMonth = selectedDate.substring(0, 7); // e.g., "2026-05"
+    const monthRecords = attendance.filter(rec => rec.date.startsWith(yearMonth));
+    
+    // Create 5 weeks placeholder
+    const weeks = Array.from({ length: 5 }, (_, idx) => ({
+      name: `Week ${idx + 1}`,
+      Present: 0,
+      AbsentSick: 0
+    }));
+
+    monthRecords.forEach(rec => {
+      const dateParts = rec.date.split('-');
+      if (dateParts.length === 3) {
+        const day = parseInt(dateParts[2], 10);
+        if (!isNaN(day)) {
+          const weekIdx = Math.min(Math.floor((day - 1) / 7), 4); // Max index 4 (Week 5)
+          if (rec.status === 'Present' || rec.status === 'Late') {
+            weeks[weekIdx].Present += 1;
+          } else if (rec.status === 'Absent' || rec.status === 'Sick') {
+            weeks[weekIdx].AbsentSick += 1;
+          }
+        }
+      }
+    });
+
+    return weeks;
+  }, [attendance, selectedDate]);
+
+  const monthStats = useMemo(() => {
+    let present = 0;
+    let absentSick = 0;
+    weeklyChartData.forEach(w => {
+      present += w.Present;
+      absentSick += w.AbsentSick;
+    });
+    const total = present + absentSick;
+    const avgRate = total > 0 ? Math.round((present / total) * 100) : 100;
+    return {
+      totalPresent: present,
+      totalAbsentSick: absentSick,
+      avgRate
+    };
+  }, [weeklyChartData]);
 
   const handleMarkStatus = (childId: string, status: 'Present' | 'Absent' | 'Sick' | 'Late', checkIn?: string, checkOut?: string) => {
     const updated = stateService.addAttendance({
@@ -200,6 +247,57 @@ export const AttendanceTab: React.FC<AttendanceTabProps> = ({ stateService }) =>
           <button onClick={() => setImportLog(null)} className="text-xxs font-semibold text-slate-500 hover:text-slate-800 underline">Close Log Summary</button>
         </div>
       )}
+
+      {/* Attendance Analytics Bar Chart */}
+      <div id="attendance-trends-chart" className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-450 mb-3">Weekly Attendance Rate trends</h3>
+          <p className="text-xs text-slate-400 mb-4">Comparing active attendance with absence/sick logs per calendar week</p>
+          <div className="h-60 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={weeklyChartData} margin={{ top: 10, right: 10, left: -25, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis dataKey="name" tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis allowDecimals={false} tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false} />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0', fontFamily: 'sans-serif', fontSize: '12px' }}
+                />
+                <Legend iconType="circle" wrapperStyle={{ fontSize: '11px', paddingTop: '8px' }} />
+                <Bar dataKey="Present" fill="#10b981" radius={[4, 4, 0, 0]} name="Present / Late" />
+                <Bar dataKey="AbsentSick" fill="#f43f5e" radius={[4, 4, 0, 0]} name="Absent / Sick" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className="bg-slate-50 p-5 rounded-xl border border-slate-150 flex flex-col justify-between">
+          <div>
+            <h4 className="font-bold text-xs text-slate-500 uppercase tracking-wider mb-1">
+              {new Date(selectedDate).toLocaleString('default', { month: 'long', year: 'numeric' })}
+            </h4>
+            <p className="text-xxs text-slate-450 mb-4">Static calculation based on registered month entries</p>
+
+            <div className="space-y-3.5 pt-2">
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-slate-500">Avg. Monthly Presence:</span>
+                <span className="font-bold font-mono text-emerald-600 text-sm">{monthStats.avgRate}%</span>
+              </div>
+              <div className="flex justify-between items-center text-xs border-t border-slate-200 pt-3">
+                <span className="text-slate-500">Total Present Days:</span>
+                <span className="font-semibold font-mono text-slate-700">{monthStats.totalPresent}</span>
+              </div>
+              <div className="flex justify-between items-center text-xs">
+                <span className="text-slate-500">Total Absent/Sick Records:</span>
+                <span className="font-semibold font-mono text-slate-705">{monthStats.totalAbsentSick}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="text-[10px] text-slate-400 leading-relaxed border-t border-slate-200 pt-3 mt-4">
+            Notice: Average attendance target is 80%. Multi-week absence trends for targeted children trigger an automatic POPIA integrity warning flag on the roster below.
+          </div>
+        </div>
+      </div>
 
       {/* Roster of Registered Kids and status grid selectors */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">

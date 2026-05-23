@@ -98,7 +98,8 @@ export class StateService {
       saIdNumber: "8503155800081",
       email: "thabo.m@example.co.za",
       phone: "0825551234",
-      address: "12 Nelson Mandela Dr, Pretoria"
+      address: "12 Nelson Mandela Dr, Pretoria",
+      popiaSigned: true
     });
 
     const parent2 = this.registerParent({
@@ -107,7 +108,8 @@ export class StateService {
       saIdNumber: "9107220188083",
       email: "leandra.botha@mweb.co.za",
       phone: "0713459876",
-      address: "44 Lynne Rd, Garsfontein, Pretoria"
+      address: "44 Lynne Rd, Garsfontein, Pretoria",
+      popiaSigned: false
     });
 
     // Seed Children
